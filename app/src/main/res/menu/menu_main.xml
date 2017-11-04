@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.moon.gagandeep.notes.MainActivity">
+    <item
+        android:id="@+id/insertDummy"
+        android:orderInCategory="100"
+        android:title="Insert Dummy Data"
+        app:showAsAction="never" />
+</menu>
