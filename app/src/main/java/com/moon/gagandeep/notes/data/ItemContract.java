@@ -19,5 +19,8 @@ public class ItemContract {
         public static final String ITEM_NAME = "name";
         public static final String ITEM_DESCRIPTION = "description";
         public static final String ITEM_IMAGE_URI = "imagestring";
+        public static final String ITEM_MONTH = "monthstring";
+        public static final String ITEM_DATE = "datestring";
+//        public static final String ITEM_IMAGE_BLOB = "imageblob";
     }
 }
