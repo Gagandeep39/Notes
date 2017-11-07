@@ -1,15 +1,14 @@
 package com.moon.gagandeep.notes.data;
 
-import android.content.ClipData;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.util.ArrayList;
-
 import com.moon.gagandeep.notes.Item;
 import com.moon.gagandeep.notes.data.ItemContract.ItemEntry;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +31,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 + ItemEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + ItemEntry.ITEM_NAME + " TEXT NOT NULL, "
                 + ItemEntry.ITEM_DESCRIPTION + " TEXT NOT NULL, "
+                + ItemEntry.ITEM_DATE + " TEXT NOT NULL, "
+                + ItemEntry.ITEM_MONTH + " TEXT NOT NULL, "
                 + ItemEntry.ITEM_IMAGE_URI + " TEXT NOT NULL );";
         db.execSQL(CREATE_TABLE);
 
@@ -49,13 +50,18 @@ public class DbHelper extends SQLiteOpenHelper {
         int descriptionIndex = cursor.getColumnIndex(ItemEntry.ITEM_DESCRIPTION);
         int nameIndex = cursor.getColumnIndex(ItemEntry.ITEM_NAME);
         int imageIndex = cursor.getColumnIndex(ItemEntry.ITEM_IMAGE_URI);
+        int monthIndex = cursor.getColumnIndex(ItemEntry.ITEM_MONTH);
+        int dateIndex = cursor.getColumnIndex(ItemEntry.ITEM_DATE);
         if (cursor.moveToFirst()){
             datamodel.clear();
             do {
                 datamodel.add(new Item(cursor.getString(nameIndex),
                         cursor.getString(descriptionIndex),
                         cursor.getInt(idIndex),
+                        cursor.getString(monthIndex),
+                        cursor.getString(dateIndex),
                         cursor.getString(imageIndex)));
+
             }while (cursor.moveToNext());
         }
         return datamodel;

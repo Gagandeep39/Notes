@@ -6,40 +6,38 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.IOException;
-import java.util.List;
 
 import com.moon.gagandeep.notes.data.DbHelper;
 import com.moon.gagandeep.notes.data.ItemContract.ItemEntry;
+import com.squareup.picasso.Picasso;
 
-import static android.content.ContentValues.TAG;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by gagandeep on 5/11/17.
  */
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
+    public List<Item> list;
+    DbHelper helper;
     private int itemRemoved;
+    private Context context;
     public ItemAdapter(Context context, List<Item> list) {
         this.context = context;
         this.list = list;
     }
-
-    private Context context;
-    public List<Item> list;
-    DbHelper helper;
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -50,29 +48,62 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         itemRemoved = position;
-
         Item currentItem = list.get(position);
         final int id = currentItem.getItemId();
         helper = new DbHelper(context);
-        final String idString = Integer.toString(id);
+        holder.textViewDate.setText(currentItem.getItemDate());
+        holder.textViewMonth.setText(currentItem.getItemMonth());
+//        holder.textViewID.setText(String.valueOf(id));
+        holder.textViewID.setVisibility(View.GONE);
 
-        holder.textViewID.setText(idString);
-        holder.textViewName.setText(currentItem.getItemName());
-        holder.textViewDescription.setText(currentItem.getItemDescription());
-        final String imageString = currentItem.getItemImage();
+
+        if (currentItem.getItemName().length() == 0) {
+            holder.linearLayout.setVisibility(View.GONE);
+            holder.textViewName.setVisibility(View.GONE);
+        }
+        else {
+            holder.linearLayout.setVisibility(View.VISIBLE);
+            holder.textViewName.setVisibility(View.VISIBLE);
+            String name = String.valueOf(currentItem.getItemName().charAt(0)).toUpperCase() + currentItem.getItemName().subSequence(1, currentItem.getItemName().length());
+            holder.textViewName.setText(name);
+        }
+        if (currentItem.getItemDescription().length() == 0) {
+            holder.textViewDescription.setVisibility(View.GONE);
+        }
+        else {
+            holder.textViewDescription.setVisibility(View.VISIBLE);
+            String desc = String.valueOf(currentItem.getItemDescription().charAt(0)).toUpperCase() + currentItem.getItemDescription().subSequence(1, currentItem.getItemDescription().length());
+            holder.textViewDescription.setText(desc);
+        }
+        String imageString = currentItem.getItemImage();
         Uri imageUri = Uri.parse(imageString);
-        Bitmap bitmap = null;
+        Picasso.with(context)
+                .load(imageUri)
+                .resize(720, 1280)
+                .onlyScaleDown()
+                .centerInside()
+                .into(holder.imageView);
         try {
-            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
-            holder.imageView.setImageBitmap(bitmap);
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
+            Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(Palette palette) {
+                    Palette.Swatch vibrant = palette.getVibrantSwatch();
+                    Palette.Swatch dominant = palette.getDominantSwatch();
+                    if (vibrant != null)
+                        holder.cardView.setCardBackgroundColor(vibrant.getRgb());
+                    else
+                        holder.cardView.setCardBackgroundColor(dominant.getRgb());
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.i(TAG, "onBindViewHolder: " + "ON BIND VIEW HOLDER");
+
         holder.constraintLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                alertDialogue(idString, id);
+                alertDialogue(id);
                 return true;
             }
         });
@@ -82,8 +113,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                 openActivity(id);
             }
         });
-    }
 
+
+    }
     private void openActivity(int id) {
         Intent intent = new Intent(context, InsertActivity.class);
         Uri uri = ContentUris.withAppendedId(ItemEntry.CONTENT_URI, id);
@@ -91,47 +123,31 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         intent.setData(uri);
         context.startActivity(intent);
     }
-
     @Override
     public int getItemCount() {
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
-        TextView textViewName, textViewDescription, textViewID;
-        ImageView imageView;
-        ConstraintLayout constraintLayout;
-        public ViewHolder(View itemView) {
-            super(itemView);
-            textViewName = itemView.findViewById(R.id.itemName);
-            textViewDescription = itemView.findViewById(R.id.itemDescription);
-            textViewID = itemView.findViewById(R.id.textViewId);
-            imageView = itemView.findViewById(R.id.imageView);
-            constraintLayout = itemView.findViewById(R.id.constraintInner);
-        }
-    }
 
-
-
-    private void alertDialogue(final String idString, final int id) {
+    // Display Alert Box
+    private void alertDialogue(final int id) {
         new AlertDialog.Builder(context)
                 .setMessage("Are you Sure you want to Delete")
-                .setIcon(android.R.drawable.alert_light_frame)
+                .setIcon(R.drawable.ic_warning_black_24dp)
                 .setTitle("Are you sure")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        deleteItem(idString, id);
+                        deleteItem(id);
                     }
                 })
                 .setNegativeButton("No", null)
                 .show();
     }
 
-    private void deleteItem(String idString, int id) {
+    private void deleteItem(int id) {
         Uri uri = ContentUris.withAppendedId(ItemEntry.CONTENT_URI, id);
-        Toast.makeText(context, "" + idString, Toast.LENGTH_SHORT).show();
         context.getContentResolver().delete(uri, null, null);
         helper.datamodel = helper.getItemData();
         list = helper.getItemData();
@@ -139,6 +155,31 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
     }
 
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        TextView textViewName, textViewDescription, textViewID, textViewMonth, textViewDate;
+        ImageView imageView;
+        ConstraintLayout constraintLayout;
+        CardView cardView;
+        LinearLayout linearLayout;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            textViewName = itemView.findViewById(R.id.itemName);
+            textViewDescription = itemView.findViewById(R.id.itemDescription);
+            textViewID = itemView.findViewById(R.id.textViewId);
+            imageView = itemView.findViewById(R.id.imageView);
+            constraintLayout = itemView.findViewById(R.id.constraintInner);
+            textViewMonth = itemView.findViewById(R.id.textViewMonth);
+            textViewDate = itemView.findViewById(R.id.textViewDate);
+            cardView = itemView.findViewById(R.id.cardView);
+            linearLayout = itemView.findViewById(R.id.linearLayout);
+
+        }
+    }
+
+
 
 
 }
+
+

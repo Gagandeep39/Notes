@@ -3,8 +3,10 @@
     package="com.moon.gagandeep.notes">
 
     <uses-permission-sdk-23 android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission-sdk-23 android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -23,7 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".InsertActivity" />
+        <activity
+            android:name=".InsertActivity"
+            android:label="Edit"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppThemeNoAction" />
 
         <provider
             android:name=".data.ItemProvider"
