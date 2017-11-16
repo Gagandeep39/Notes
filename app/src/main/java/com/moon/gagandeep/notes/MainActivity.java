@@ -73,10 +73,11 @@ public class MainActivity extends AppCompatActivity{
         Log.i("Test",""+datamodel);
         RecyclerView.LayoutManager reLayoutManager =new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(reLayoutManager);
-        recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
-
-
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setDrawingCacheEnabled(true);
+        recyclerView.setItemViewCacheSize(100);
+        recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
         mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {

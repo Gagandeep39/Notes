@@ -32,6 +32,7 @@ import java.util.List;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public List<Item> list;
     DbHelper helper;
+    CardView cardView;
     private int itemRemoved;
     private Context context;
     public ItemAdapter(Context context, List<Item> list) {
@@ -53,7 +54,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         helper = new DbHelper(context);
         holder.textViewDate.setText(currentItem.getItemDate());
         holder.textViewMonth.setText(currentItem.getItemMonth());
-//        holder.textViewID.setText(String.valueOf(id));
         holder.textViewID.setVisibility(View.GONE);
 
 
@@ -79,7 +79,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         Uri imageUri = Uri.parse(imageString);
         Picasso.with(context)
                 .load(imageUri)
-                .resize(720, 1280)
+                .resize(480, 640)
                 .onlyScaleDown()
                 .centerInside()
                 .into(holder.imageView);
